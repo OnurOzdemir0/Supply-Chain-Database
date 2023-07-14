@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.sql.DataSource;
 import org.ozyegin.cs.entity.Company;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
@@ -49,8 +50,14 @@ public class CompanyRepository extends JdbcDaoSupport {
 
   public Company find(String name) {
     List<Company> companies = Objects.requireNonNull(getJdbcTemplate()).query(findByNamePS, new Object[]{name}, companyRowMapper);
-    return companies.get(0);
+    if (companies.isEmpty()) {
+      throw new EmptyResultDataAccessException(1);
+    } else {
+      return companies.get(0);
+    }
   }
+
+
 
   public List<Company> findByCountry(String country) {
     List<Company> companies = Objects.requireNonNull(getJdbcTemplate()).query(findByCountryPS, new Object[]{country}, companyRowMapper);

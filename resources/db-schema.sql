@@ -16,7 +16,6 @@ create table if not exists company(
   e_mails TEXT[]
 );
 
-
 create table if not exists product(
     id serial PRIMARY KEY,
     name VARCHAR(128) NOT NULL,
@@ -39,20 +38,27 @@ create table if not exists transaction(
     created_date timestamp without time zone NOT NULL
     );
 
+CREATE TABLE if not exists transaction_history (
+    id serial PRIMARY KEY,
+    company_name VARCHAR(128) NOT NULL REFERENCES company(name) ON DELETE CASCADE,
+    product_id int NOT NULL REFERENCES product(id) ON DELETE CASCADE,
+    amount int NOT NULL,
+    created_date timestamp without time zone NOT NULL
+);
+
+
 -- |||||||||||||||||||||||||||| this was a sample start ||||||||||||||||||||||||||||||||||||--
 create FUNCTION sample_trigger() RETURNS TRIGGER AS
 '
     BEGIN
         IF (SELECT value FROM sample where id = NEW.id ) > 1000
-           THEN
-           RAISE SQLSTATE ''23503'';
-           END IF;
+        THEN
+            RAISE SQLSTATE ''23503'';
+        END IF;
         RETURN NEW;
     END;
 ' LANGUAGE plpgsql;
--- |||||||||||||||||||||||||||| this was a sample end ||||||||||||||||||||||||||||||||||||--
 
--- |||||||||||||||||||||||||||| this was a sample start ||||||||||||||||||||||||||||||||||||--
 create TRIGGER sample_value AFTER insert ON sample
     FOR EACH ROW EXECUTE PROCEDURE sample_trigger();
 -- |||||||||||||||||||||||||||| this was a sample end ||||||||||||||||||||||||||||||||||||--
